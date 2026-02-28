@@ -556,12 +556,21 @@ class SceneKitRenderer:
 
     @staticmethod
     def encode_png(image: np.ndarray) -> bytes:
-        """Encode numpy image as PNG bytes."""
+        """Encode numpy image as RGBA PNG bytes.
+
+        The SimWorld client's _decode_png assumes RGBA and strips alpha,
+        so we always output 4-channel PNG.
+        """
         if image.dtype == np.float32:
             lo, hi = image.min(), image.max()
             span = hi - lo if hi > lo else 1.0
             normalized = ((image - lo) / span * 255).astype(np.uint8)
             pil_img = Image.fromarray(normalized, mode='L')
+        elif image.ndim == 3 and image.shape[2] == 3:
+            # Add alpha channel (fully opaque) for SimWorld client compatibility
+            alpha = np.full((*image.shape[:2], 1), 255, dtype=np.uint8)
+            rgba = np.concatenate([image, alpha], axis=2)
+            pil_img = Image.fromarray(rgba, mode='RGBA')
         else:
             pil_img = Image.fromarray(image)
         buf = io.BytesIO()
