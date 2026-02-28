@@ -210,7 +210,10 @@ class WorldState:
     def humanoid_rotate(self, name: str, angle: float, clockwise: int):
         with self.lock:
             if name in self.objects:
-                self.objects[name].rotation[1] += angle  # yaw
+                if clockwise:
+                    self.objects[name].rotation[1] -= angle  # yaw clockwise
+                else:
+                    self.objects[name].rotation[1] += angle  # yaw counter-clockwise
 
     def humanoid_set_speed(self, name: str, speed: float):
         with self.lock:

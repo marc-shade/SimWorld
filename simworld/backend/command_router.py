@@ -368,6 +368,7 @@ class CommandRouter:
         self._route(r'^vbp ([\w.]+) StopAgent$', self._vbp_stop_agent)
         self._route(r'^vbp ([\w.]+) StepForward ([-\d.e+]+) (\d+)$', self._vbp_step_forward)
         self._route(r'^vbp ([\w.]+) SetMaxSpeed ([-\d.e+]+)$', self._vbp_set_max_speed)
+        self._route(r'^vbp ([\w.]+) SetSpeed ([-\d.e+]+)$', self._vbp_set_max_speed)
 
         # Humanoid actions
         self._route(r'^vbp ([\w.]+) SitDown$', self._vbp_sit_down)
