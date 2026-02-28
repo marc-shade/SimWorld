@@ -7,8 +7,8 @@ import random
 from typing import List
 
 import pyqtgraph as pg
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (QApplication, QLabel, QMainWindow, QVBoxLayout,
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (QApplication, QLabel, QMainWindow, QVBoxLayout,
                              QWidget)
 
 from simworld.citygen.dataclass.dataclass import (Bounds, Building,
@@ -111,7 +111,7 @@ class CityVisualizer(QMainWindow):
 
         # Create title label
         self.title_label = QLabel()
-        self.title_label.setAlignment(Qt.AlignCenter)
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.title_label.setStyleSheet(
             'QLabel {color: #34495E;font-size: 14px;font-weight: bold;padding: 5px;}'
         )
@@ -260,7 +260,7 @@ def visualize(config: Config, input_dir: str = None):
     visualizer.show()
     visualizer.draw_frame()
 
-    app.exec_()
+    app.exec()
 
 
 if __name__ == '__main__':

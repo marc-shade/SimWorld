@@ -27,19 +27,25 @@ setup(
         'numpy',
         'pandas',
         'pyqtgraph',
-        'PyQt5',
+        'PyQt6',
         'unrealcv',
         'opencv-python',
         'pillow',
         'sentence-transformers',
         'faiss-cpu',
-        'openai'
+        'openai',
+        'anthropic',
     ],
     extras_require={
         'dev': [
             'pytest',
             'flake8',
             'black',
+        ],
+        'macos': [
+            'pyobjc-framework-SceneKit',
+            'pyobjc-framework-Metal',
+            'pyobjc-framework-Quartz',
         ],
     },
 )

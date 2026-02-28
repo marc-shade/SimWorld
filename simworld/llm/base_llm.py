@@ -5,6 +5,7 @@ import os
 import time
 from typing import Optional
 
+import anthropic
 import openai
 
 from simworld.utils.logger import Logger
@@ -52,7 +53,13 @@ class BaseLLM(metaclass=LLMMetaclass):
 
         self.provider = provider
 
-        if provider == 'openai':
+        if provider == 'anthropic':
+            anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
+            if not anthropic_api_key:
+                raise ValueError('No Anthropic API key provided. Please set ANTHROPIC_API_KEY environment variable.')
+            self.api_key = anthropic_api_key
+            self.anthropic_client = anthropic.Anthropic(api_key=self.api_key)
+        elif provider == 'openai':
             if not openai_api_key:
                 raise ValueError('No OpenAI API key provided. Please set OPENAI_API_KEY environment variable.')
             self.api_key = openai_api_key
@@ -69,17 +76,18 @@ class BaseLLM(metaclass=LLMMetaclass):
         if url == 'None':
             url = None
 
-        try:
-            self.client = openai.OpenAI(
-                api_key=self.api_key,
-                base_url=url,
-            )
-            # Validate the API key for cloud providers
-            # Skip validation for local providers as they may not implement models.list()
-            if provider != 'local':
-                self.client.models.list()
-        except Exception as e:
-            raise ValueError(f'Failed to initialize OpenAI client: {str(e)}')
+        if provider != 'anthropic':
+            try:
+                self.client = openai.OpenAI(
+                    api_key=self.api_key,
+                    base_url=url,
+                )
+                # Validate the API key for cloud providers
+                # Skip validation for local providers as they may not implement models.list()
+                if provider != 'local':
+                    self.client.models.list()
+            except Exception as e:
+                raise ValueError(f'Failed to initialize OpenAI client: {str(e)}')
 
         self.model_name = model_name
         self.logger = Logger.get_logger('BaseLLM')
@@ -129,6 +137,17 @@ class BaseLLM(metaclass=LLMMetaclass):
         top_p: float = None,
         **kwargs,
     ) -> str:
+        if self.provider == 'anthropic':
+            response = self.anthropic_client.messages.create(
+                model=self.model_name,
+                max_tokens=max_tokens,
+                system=system_prompt,
+                messages=[{'role': 'user', 'content': user_prompt}],
+            )
+            for block in response.content:
+                if block.type == 'text':
+                    return block.text  # type: ignore[union-attr]
+            return ''
         response = self.client.chat.completions.create(
             model=self.model_name,
             messages=[

@@ -6,9 +6,9 @@ import sys
 from collections import defaultdict
 from typing import List
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QPainter, QPen
-from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor, QPainter, QPen
+from PyQt6.QtWidgets import QApplication, QWidget
 
 from simworld.config import Config
 from simworld.utils.load_json import load_json
@@ -479,7 +479,7 @@ class Map:
 
             def paintEvent(self, event):
                 painter = QPainter(self)
-                painter.setRenderHint(QPainter.Antialiasing)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
                 width, height, margin = self.width(), self.height(), 50
                 scale_x = (width - 2 * margin) / (self.max_x - self.min_x) if self.max_x > self.min_x else 1
                 scale_y = (height - 2 * margin) / (self.max_y - self.min_y) if self.max_y > self.min_y else 1
@@ -513,13 +513,13 @@ class Map:
                 # Draw nodes by type
                 for node in self.nodes:
                     node_type = getattr(node, 'type', None)
-                    color = Qt.gray
+                    color = Qt.GlobalColor.gray
                     if node_type == 'sidewalk':
-                        color = Qt.green
+                        color = Qt.GlobalColor.green
                     elif node_type == 'crosswalk':
-                        color = Qt.blue
+                        color = Qt.GlobalColor.blue
                     elif node_type == 'intersection':
-                        color = Qt.red
+                        color = Qt.GlobalColor.red
                     painter.setPen(QPen(color, 6))
                     x = margin + (node.position.x - self.min_x) * base_scale
                     y = margin + (node.position.y - self.min_y) * base_scale
@@ -538,7 +538,7 @@ class Map:
                 self.update()
 
             def mousePressEvent(self, event):
-                if event.button() == Qt.LeftButton:
+                if event.button() == Qt.MouseButton.LeftButton:
                     self.last_mouse_pos = event.pos()
 
             def mouseMoveEvent(self, event):
@@ -550,7 +550,7 @@ class Map:
                     self.update()
 
             def mouseReleaseEvent(self, event):
-                if event.button() == Qt.LeftButton:
+                if event.button() == Qt.MouseButton.LeftButton:
                     self.last_mouse_pos = None
 
             def _draw_legend(self, painter, margin):
@@ -645,7 +645,7 @@ class Map:
 
             def paintEvent(self, event):
                 painter = QPainter(self)
-                painter.setRenderHint(QPainter.Antialiasing)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
                 width, height, margin = self.width(), self.height(), 50
                 scale_x = (width - 2 * margin) / (self.max_x - self.min_x) if self.max_x > self.min_x else 1
                 scale_y = (height - 2 * margin) / (self.max_y - self.min_y) if self.max_y > self.min_y else 1
@@ -787,7 +787,7 @@ class Map:
                 self.update()
 
             def mousePressEvent(self, event):
-                if event.button() == Qt.LeftButton:
+                if event.button() == Qt.MouseButton.LeftButton:
                     self.last_mouse_pos = event.pos()
 
             def mouseMoveEvent(self, event):
@@ -799,7 +799,7 @@ class Map:
                     self.update()
 
             def mouseReleaseEvent(self, event):
-                if event.button() == Qt.LeftButton:
+                if event.button() == Qt.MouseButton.LeftButton:
                     self.last_mouse_pos = None
 
         app = QApplication.instance() or QApplication(sys.argv)

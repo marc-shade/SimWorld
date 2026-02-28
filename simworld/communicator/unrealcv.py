@@ -27,18 +27,25 @@ class UnrealCV(object):
     including basic operations and traffic system operations.
     """
 
-    def __init__(self, port=9000, ip='127.0.0.1', resolution=(1280, 720)):
+    def __init__(self, port=9000, ip='127.0.0.1', resolution=(1280, 720),
+                 max_retries=30, retry_delay=1.0, timeout=30):
         """Initialize the UnrealCV client.
 
         Args:
             port: Connection port, defaults to 9000.
             ip: Connection IP address, defaults to 127.0.0.1.
-            resolution: Resolution, defaults to (320, 240).
+            resolution: Resolution, defaults to (1280, 720).
+            max_retries: Maximum connection retry attempts, defaults to 30.
+            retry_delay: Delay in seconds between retries, defaults to 1.0.
+            timeout: Connection timeout in seconds, defaults to 30.
         """
         self.ip = ip
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
+        self.timeout = timeout
         # Build a client to connect to the environment
         self.client = unrealcv.Client((ip, port))
-        self.client.connect()
+        self.client.connect(timeout=timeout)
 
         self.resolution = resolution
 
@@ -67,11 +74,24 @@ class UnrealCV(object):
         time.sleep(1)
 
     def check_connection(self):
-        """Check connection status, attempt to reconnect if not connected."""
+        """Check connection status, attempt to reconnect if not connected.
+
+        Raises:
+            ConnectionError: If connection cannot be established after max_retries attempts.
+        """
+        retries = 0
         while self.client.isconnected() is False:
-            self.logger.error('UnrealCV server is not running. Please try again')
-            time.sleep(1)
-            self.client.connect()
+            retries += 1
+            if retries > self.max_retries:
+                raise ConnectionError(
+                    f'Failed to connect to UnrealCV server at {self.ip} '
+                    f'after {self.max_retries} attempts'
+                )
+            self.logger.error(
+                f'UnrealCV server is not running. Retry {retries}/{self.max_retries}'
+            )
+            time.sleep(self.retry_delay)
+            self.client.connect(timeout=self.timeout)
 
     # Deprecated
     def spawn(self, prefab, name):
