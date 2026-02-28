@@ -231,23 +231,35 @@ class CommandRouter:
     def _vset_spawn(self, m):
         prefab, name = m.group(1), m.group(2)
         self.world.spawn(prefab, name)
+        if self.renderer is not None:
+            obj = self.world.objects[name]
+            self.renderer.add_object(name, prefab, obj.position, obj.scale)
         return 'ok'
 
     def _vset_spawn_bp(self, m):
         prefab_path, name = m.group(1), m.group(2)
         self.world.spawn(prefab_path, name)
+        if self.renderer is not None:
+            obj = self.world.objects[name]
+            self.renderer.add_object(name, prefab_path, obj.position, obj.scale)
         return 'ok'
 
     def _vset_object_location(self, m):
         name = m.group(1)
         x, y, z = float(m.group(2)), float(m.group(3)), float(m.group(4))
         self.world.set_location(name, x, y, z)
+        if self.renderer is not None and name in self.world.objects:
+            obj = self.world.objects[name]
+            self.renderer.update_object(name, position=obj.position, rotation=obj.rotation)
         return 'ok'
 
     def _vset_object_rotation(self, m):
         name = m.group(1)
         p, y, r = float(m.group(2)), float(m.group(3)), float(m.group(4))
         self.world.set_rotation(name, p, y, r)
+        if self.renderer is not None and name in self.world.objects:
+            obj = self.world.objects[name]
+            self.renderer.update_object(name, position=obj.position, rotation=obj.rotation)
         return 'ok'
 
     def _vset_object_scale(self, m):
@@ -288,6 +300,8 @@ class CommandRouter:
     def _vset_object_destroy(self, m):
         name = m.group(1)
         self.world.destroy(name)
+        if self.renderer is not None:
+            self.renderer.remove_object(name)
         return 'ok'
 
     def _vset_fps(self, m):
@@ -319,12 +333,16 @@ class CommandRouter:
         cam_id = int(m.group(1))
         x, y, z = float(m.group(2)), float(m.group(3)), float(m.group(4))
         self.world.set_camera_location(cam_id, x, y, z)
+        if self.renderer is not None:
+            self.renderer.update_camera(cam_id, position=np.array([x, y, z]))
         return 'ok'
 
     def _vset_camera_rotation(self, m):
         cam_id = int(m.group(1))
         p, y, r = float(m.group(2)), float(m.group(3)), float(m.group(4))
         self.world.set_camera_rotation(cam_id, p, y, r)
+        if self.renderer is not None:
+            self.renderer.update_camera(cam_id, rotation=np.array([p, y, r]))
         return 'ok'
 
     def _vset_camera_fov(self, m):
